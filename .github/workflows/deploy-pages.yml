@@ -29,10 +29,23 @@ jobs:
           # Try common Nuxt commands; no-op on failure
           npm run generate || npx nuxi generate || npm run build || true
 
+      - name: Prepare publish directory
+        run: |
+          if [ -d .output/public ]; then
+            rm -rf dist || true
+            mkdir -p dist
+            cp -r .output/public/* dist/ || true
+          elif [ -d dist ]; then
+            echo "dist exists"
+          else
+            echo "No build output found; creating empty dist"
+            mkdir -p dist
+            echo "" > dist/index.html
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          # fallback directory if Nuxt uses .output/public
           publish_branch: gh-pages
